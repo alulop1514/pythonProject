@@ -75,7 +75,7 @@ while ejecutando:
             if evento.key == pygame.K_LEFT:
                 jugXCambio = 0
             elif evento.key == pygame.K_RIGHT:
-                jugXCambio = 0
+                 jugXCambio = 0
 
     jugX += jugXCambio
     if jugX <= 0:
