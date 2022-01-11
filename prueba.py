@@ -1,6 +1,7 @@
 import math
 
 import pygame
+import datetime
 import random
 
 # Iniciamos pygame
@@ -43,6 +44,15 @@ powerY = 0
 powerYCambio = 2
 def mostrar_power_up(x, y):
     pantalla.blit(icono_power_up, (x, y))
+
+# Power Down
+estado_power_down = "no_lanzado"
+icono_power_down = pygame.image.load("low-battery.png")
+powerDX = random.randint(0, 700)
+powerDY = 0
+powerDYCambio = 2
+def mostrar_power_down(x, y):
+    pantalla.blit(icono_power_down, (x, y))
 
 # Enemigo
 iconoEnemigo = []
@@ -95,6 +105,8 @@ def colision(eneX, eneY, balaX, balaY):
             return False
 ejecutando = True
 num_power_up = random.randint(0, 5)
+num_power_down = random.randint(0, 5)
+start_time = datetime.datetime.now().time().second
 while ejecutando:
 
     pantalla.fill((0, 0, 0))
@@ -150,6 +162,11 @@ while ejecutando:
                     estado_power_up = "lanzado"
                     powerX = eneX[i]
                     powerY = eneY[i]
+            if estado_power_down == "no_lanzado":
+                if num_power_down == random.randint(0, 5):
+                    estado_power_down = "lanzado"
+                    powerDX = eneX[i]
+                    powerDY = eneY[i]
         enemigo(eneX[i], eneY[i], i)
 
         if eneY[i] >= jugY + 5:
@@ -157,6 +174,19 @@ while ejecutando:
                 eneY[j] = 2000
             mostrar_game_over()
             break
+
+    if estado_power_down == "cogido":
+        tiempo = datetime.datetime.now().time()
+        seconds = tiempo.second
+        if seconds < start_time + 5:
+            for i in range(num_ene):
+                eneXCambio[i] /= 10000000
+        else:
+            for i in range(num_ene):
+                eneXCambio[i] *= 10000000
+            estado_power_down = "no_lanzado"
+            powerDX = random.randint(0, 700)
+            powerDY = 0
 
     if balaY <= 0:
         balaY = 480
@@ -168,12 +198,23 @@ while ejecutando:
     colisionB = colision(jugX, jugY, powerX, powerY)
     if colisionB:
         estado_power_up = "cogido"
+
+    colisionC = colision(jugX, jugY, powerDX, powerDY)
+    if colisionC:
+        start_time = datetime.datetime.now().time().second
+        estado_power_down = "cogido"
+
     if estado_power_up == "lanzado":
         powerY += powerYCambio
         mostrar_power_up(powerX, powerY)
-
         if powerY > jugY:
             estado_power_up = "no_lanzado"
+
+    if estado_power_down == "lanzado":
+        powerDY += powerDYCambio
+        mostrar_power_down(powerDX, powerDY)
+        if powerDY > jugY:
+            estado_power_down = "no_lanzado"
 
     mostrar_puntuacion(textX, textY)
     jugador(jugX, jugY)
